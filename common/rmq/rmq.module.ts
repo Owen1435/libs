@@ -1,16 +1,31 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
-const EXCHANGES = [];
+const EXCHANGES = [
+  {
+    name: 'client.registered.exchange',
+    type: 'fanout',
+  },
+  {
+    name: 'product.added.exchange',
+    type: 'fanout',
+  },
+];
 
+export const rmqConfig = {
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: async (configService: ConfigService) => ({
+    exchanges: [...EXCHANGES],
+    uri: configService.get('RMQ_URI'),
+    enableControllerDiscovery: true,
+  }),
+};
+
+@Global()
 @Module({
-  imports: [
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [...EXCHANGES],
-      uri: 'amqp://localhost:5672',
-      enableControllerDiscovery: true,
-    }),
-  ],
+  imports: [RabbitMQModule.forRootAsync(RabbitMQModule, rmqConfig)],
   exports: [RabbitMQModule],
 })
 export class RmqModule {}

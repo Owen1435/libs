@@ -1,7 +1,9 @@
 import { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions/http.exception';
 
-export class BaseExceptionFilter<T extends HttpException> implements ExceptionFilter {
+export class BaseExceptionFilter<T extends HttpException>
+  implements ExceptionFilter
+{
   catch(exception: T, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -12,8 +14,9 @@ export class BaseExceptionFilter<T extends HttpException> implements ExceptionFi
       path: request.url,
       statusCode: status,
       message: exception.message,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      description: exception.getResponse()?.error
+      description: exception.getResponse()?.error,
     });
   }
 }
